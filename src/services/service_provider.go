@@ -5,6 +5,5 @@ type ServiceProvider interface {
 	GetProjectService() ProjectService
 	GetUserService() UserService
 	GetFieldService() FieldService
-	GetVisualizationService() VisualizationService
 }
 

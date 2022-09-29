@@ -1,9 +1,10 @@
 package tests
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
-	"time"
 
 	"trackr/src/controllers"
 	"trackr/src/db"
@@ -20,6 +21,7 @@ type Suite struct {
 	Session        models.Session
 	ExpiredSession models.Session
 	Time           time.Time
+	Field          models.Field
 }
 
 func Startup() *Suite {
@@ -74,6 +76,17 @@ func Startup() *Suite {
 		User:   suite.User,
 	}
 	suite.Service.GetSessionService().AddSession(suite.ExpiredSession)
+
+	suite.Field = models.Field{
+		ID:        1,
+		Name:      "Field1",
+		UpdatedAt: suite.Time,
+		CreatedAt: suite.Time,
+
+		ProjectID: suite.Project.ID,
+		Project:   suite.Project,
+	}
+	suite.Service.GetFieldService().AddField(suite.Field)
 
 	return &suite
 }
