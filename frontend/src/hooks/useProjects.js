@@ -19,16 +19,7 @@ export const useProjects = () => {
         } else {
           setError("Failed to load projects: " + error.message);
         }
-
-        setLoading(false);
-        setProjects([]);
       });
-
-    setLoading(true);
-    setProjects([]);
-    setError();
-
-    return () => {};
   }, []);
 
   return [projects, setProjects, loading, error];

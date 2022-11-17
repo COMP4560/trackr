@@ -24,11 +24,6 @@ export const useVisualizations = (projectId) => {
         setVisualizations([]);
       });
 
-    setLoading(true);
-    setVisualizations([]);
-    setError();
-
-    return () => {};
   }, [projectId]);
 
   return [visualizations, setVisualizations, loading, error];

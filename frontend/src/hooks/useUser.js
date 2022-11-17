@@ -23,12 +23,6 @@ export const useUser = () => {
         setLoading(false);
         setUser();
       });
-
-    setLoading(true);
-    setUser();
-    setError();
-
-    return () => {};
   }, []);
 
   return [user, setUser, loading, error];

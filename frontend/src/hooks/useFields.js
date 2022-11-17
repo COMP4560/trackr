@@ -19,16 +19,8 @@ export const useFields = (projectId) => {
         } else {
           setError("Failed to load fields: " + error.message);
         }
-
-        setLoading(false);
-        setFields([]);
       });
 
-    setLoading(true);
-    setFields([]);
-    setError();
-
-    return () => {};
   }, [projectId]);
 
   return [fields, setFields, loading, error];

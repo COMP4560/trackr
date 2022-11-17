@@ -25,17 +25,7 @@ export const useValues = (fieldId, order, offset, limit) => {
         } else {
           setError("Failed to load values: " + error.message);
         }
-
-        setLoading(false);
-        setValues([]);
-        setTotalValues(0);
       });
-
-    setLoading(true);
-    setValues([]);
-    setError();
-
-    return () => {};
   }, [fieldId, order, offset, limit]);
 
   return [values, totalValues, loading, error];
