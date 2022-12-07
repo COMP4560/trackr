@@ -36,15 +36,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.homesampleapp.PERIODIC_UPDATE_INTERVAL_HOME_SCREEN_SECONDS
-import com.google.homesampleapp.R
-import com.google.homesampleapp.TaskStatus
+import com.google.homesampleapp.*
 import com.google.homesampleapp.data.DevicesRepository
 import com.google.homesampleapp.data.DevicesStateRepository
 import com.google.homesampleapp.data.UserPreferencesRepository
 import com.google.homesampleapp.databinding.FragmentCodelabInfoCheckboxBinding
 import com.google.homesampleapp.databinding.FragmentHomeBinding
-import com.google.homesampleapp.isMultiAdminCommissioning
 import com.google.homesampleapp.screens.shared.SelectedDeviceViewModel
 import com.google.homesampleapp.screens.shared.UserPreferencesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -102,8 +99,16 @@ class HomeFragment : Fragment() {
             // The click listener.
             // We update the selectedDeviceViewModel which is shared with the Device fragment.
             Timber.d("DevicesAdapter clickListener invoked")
-            selectedDeviceViewModel.setSelectedDevice(deviceUiModel)
-            view?.findNavController()?.navigate(R.id.action_homeFragment_to_deviceFragment)
+
+            // trackr - the GHSA, does not yet include temperature sensors in their device types, so we assume any unkonwn device type is a temp sensor
+            if(deviceUiModel.device.deviceType == Device.DeviceType.TYPE_LIGHT || deviceUiModel.device.deviceType == Device.DeviceType.TYPE_OUTLET ) {
+              selectedDeviceViewModel.setSelectedDevice(deviceUiModel)
+              view?.findNavController()?.navigate(R.id.action_homeFragment_to_temperatureDeviceFragment)
+            }
+            else {
+              selectedDeviceViewModel.setSelectedDevice(deviceUiModel)
+              view?.findNavController()?.navigate(R.id.action_homeFragment_to_temperatureDeviceFragment)
+            }
           },
           { view, deviceUiModel ->
             Timber.d("onOff switch onClickListener: view [$view]")

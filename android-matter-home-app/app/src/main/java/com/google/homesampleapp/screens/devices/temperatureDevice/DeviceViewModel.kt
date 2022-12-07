@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.homesampleapp.screens.device
+package com.google.homesampleapp.screens.devices.temperatureDevice
 
 import android.content.IntentSender
 import android.os.SystemClock
@@ -45,7 +45,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-/** The ViewModel for the Device Fragment. See [DeviceFragment] for additional information. */
+/** The ViewModel for the Device Fragment. See [TemperatureDeviceFragment] for additional information. */
 @HiltViewModel
 class DeviceViewModel
 @Inject

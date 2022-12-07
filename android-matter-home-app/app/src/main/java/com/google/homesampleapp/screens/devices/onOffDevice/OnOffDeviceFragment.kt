@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.homesampleapp.screens.device
+package com.google.homesampleapp.screens.devices.onOffDevice
 
 import android.app.Activity.RESULT_OK
 import android.content.res.Resources
@@ -66,7 +66,7 @@ import timber.log.Timber
  * information. Main use case is to update the device's online status dynamically.
  */
 @AndroidEntryPoint
-class DeviceFragment : Fragment() {
+class OnOffDeviceFragment : Fragment() {
 
   @Inject internal lateinit var devicesStateRepository: DevicesStateRepository
 
