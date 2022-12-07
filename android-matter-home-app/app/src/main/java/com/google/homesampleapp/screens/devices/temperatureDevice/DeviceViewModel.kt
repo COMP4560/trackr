@@ -22,7 +22,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import com.google.android.gms.home.matter.Matter
 import com.google.android.gms.home.matter.commissioning.CommissioningWindow
-import com.google.android.gms.home.matter.commissioning.ShareDeviceRequest
 import com.google.android.gms.home.matter.common.DeviceDescriptor
 import com.google.android.gms.home.matter.common.Discriminator
 import com.google.homesampleapp.DISCRIMINATOR
@@ -59,89 +58,12 @@ constructor(
   // Controls whether a periodic ping to the device is enabled or not.
   private var devicePeriodicPingEnabled: Boolean = true
 
-  /** The current status of the share device action sent via [shareDevice]. */
-  private val _shareDeviceStatus = MutableLiveData<TaskStatus>(TaskStatus.NotStarted)
-  val shareDeviceStatus: LiveData<TaskStatus>
-    get() = _shareDeviceStatus
-
   /** Generic status about actions processed in this screen. */
   private val _statusInfo = MutableLiveData("")
   val statusInfo: LiveData<String>
-    get() = _statusInfo
+  get() = _statusInfo
 
-  /**
-   * Device Sharing Step 1. Setup the LiveData that holds the IntentSender used to trigger Device
-   * Sharing. The IntentSender is returned when calling the shareDevice() API of Google Play
-   * Services (GPS) when a Device Sharing flow is initiated in Step 3. An observer of that
-   * IntentSender is setup in Step 2.
-   */
-  private val _shareDeviceIntentSender = MutableLiveData<IntentSender?>()
-  val shareDeviceIntentSender: LiveData<IntentSender?>
-    get() = _shareDeviceIntentSender
 
-  // -----------------------------------------------------------------------------------------------
-  // Device Sharing
-
-  /**
-   * Share Device Step 3. Initiates a share device task. The success callback of the
-   * commissioningClient.shareDevice() API provides the IntentSender to be used to launch the
-   * "ShareDevice" activity in Google Play Services. This viewModel provides two LiveData objects to
-   * report on the result of this API call that can then be used by the Fragment who's observing
-   * them:
-   * 1. [shareDeviceStatus] reports the result of the call which is displayed in the fragment
-   * 2. [shareDeviceIntentSender] is the result of the shareDevice() call that can then be used in
-   * the Fragment to launch the Google Play Services "Share Device" activity.
-   *
-   * After using the sender, [consumeShareDeviceIntentSender] should be called to avoid receiving
-   * the sender again after a configuration change.
-   */
-  fun shareDevice(activity: FragmentActivity) {
-    // CODELAB: shareDevice
-    _shareDeviceStatus.postValue(TaskStatus.InProgress)
-    val shareDeviceRequest =
-        ShareDeviceRequest.builder()
-            .setDeviceDescriptor(DeviceDescriptor.builder().build())
-            .setDeviceName("temp device name")
-            .setCommissioningWindow(
-                CommissioningWindow.builder()
-                    .setDiscriminator(Discriminator.forLongValue(123))
-                    .setPasscode(11223344)
-                    .setWindowOpenMillis(SystemClock.elapsedRealtime())
-                    .setDurationSeconds(180)
-                    .build())
-            .build()
-
-    Matter.getCommissioningClient(activity)
-        .shareDevice(shareDeviceRequest)
-        .addOnSuccessListener { result ->
-          Timber.d("Success on CommissioningClient.shareDevice(): result [${result}]")
-          // Communication with fragment is via livedata
-          _shareDeviceStatus.postValue(TaskStatus.Completed("Received IntentSender."))
-          _shareDeviceIntentSender.postValue(result)
-        }
-        .addOnFailureListener { error -> _shareDeviceStatus.postValue(TaskStatus.Failed(error)) }
-    // CODELAB SECTION END
-  }
-
-  // Called by the fragment in Step 5 of the Device Sharing flow.
-  fun shareDeviceSucceeded(message: String) {
-    _shareDeviceStatus.postValue(TaskStatus.Completed(message))
-  }
-
-  // Called by the fragment in Step 5 of the Device Sharing flow.
-  fun shareDeviceFailed(message: String) {
-    _shareDeviceStatus.postValue(TaskStatus.Failed(Throwable(message)))
-  }
-
-  /** Consumes the value in [shareDeviceIntentSender] and sets it back to null. */
-  private fun consumeShareDeviceIntentSender() {
-    _shareDeviceIntentSender.postValue(null)
-  }
-
-  /** Updates the status of [shareDeviceStatus] to success with the given message. */
-  fun setSharingCompletedStatusText(text: String) {
-    _shareDeviceStatus.postValue(TaskStatus.Completed(text))
-  }
 
   // -----------------------------------------------------------------------------------------------
   // Operations on device
