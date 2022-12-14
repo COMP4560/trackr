@@ -66,10 +66,11 @@ class DevicesRepository @Inject constructor(@ApplicationContext context: Context
   suspend fun addDevice(device: Device) {
     println("******\nAdding Device\n*****")
     Timber.d("addDevice: device [${device}]")
+    val id = device.deviceId
     devicesDataStore.updateData { devices -> devices.toBuilder().addDevices(device).build() }
-    deviceIds.add(device.deviceId)
-    println("Device Ids: " + device.deviceId)
-    callLastId()
+    deviceIds.add(id)
+    println("Device Ids: " + id)
+    callThisId(id)
   }
 
   suspend fun updateDevice(device: Device) {
@@ -124,17 +125,18 @@ class DevicesRepository @Inject constructor(@ApplicationContext context: Context
   }
   suspend fun callThisId(nodeId: Long){
     println("callThisId() called")
-    println("Device ID: " + nodeId + " has temperature: " +clusters.readApplicationBasicClusterAttributeList(nodeId, 0))
-    println("Device ID: " + nodeId + " has temperature: " + clusters.readApplicationBasicClusterAttributeList(nodeId, 1))
+    println("Device ID: $nodeId")
+    println(clusters.readTemperatureClusterVendorIDAttribute(nodeId, 0))
+    //println("Device ID: " + nodeId + " has temperature: " + clusters.readTemperatureClusterVendorIDAttribute(nodeId, 1))
   }
 
 
   suspend fun callLastId(){
     println("callLastId() called")
     val id = getLastDeviceId()
-    val temp: Long = 96637565
-    println("Device ID: " + id + " has temperature: " +clusters.readApplicationBasicClusterAttributeList(id, 0))
-    println("Device ID: " + id + " has temperature: " + clusters.readApplicationBasicClusterAttributeList(id, 1))
+    //val temp: Long = 27736816
+    println("Device ID: " + id + " has temperature: " +clusters.readTemperatureClusterVendorIDAttribute(id, 0))
+    println("Device ID: " + id + " has temperature: " + clusters.readTemperatureClusterVendorIDAttribute(id, 1))
   }
 
 //  suspend fun iterateThroughIds(){

@@ -134,9 +134,10 @@ constructor(
     viewModelScope.launch { devicesRepository.callLastId() }
   }
 
-  fun getTempData(id: Long){
+  fun getTempData(){
     println("getTempData() called")
-    viewModelScope.launch { devicesRepository.callThisId(id) }
+    viewModelScope.launch { devicesRepository.callLastId() }
+    //viewModelScope.launch { devicesRepository.callThisId(i) }
   }
 
   fun updateDeviceStateOn(deviceUiModel: DeviceUiModel, isOn: Boolean) {

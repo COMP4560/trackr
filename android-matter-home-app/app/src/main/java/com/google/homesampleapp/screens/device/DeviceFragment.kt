@@ -176,7 +176,7 @@ class DeviceFragment : Fragment() {
     // Share Device
     binding.shareButton.setOnClickListener {
         println("Button clicked")
-        viewModel.printData()
+        viewModel.getTempData()
     }
 
     // Change the on/off state of the device

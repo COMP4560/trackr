@@ -243,6 +243,7 @@ class ClustersHelper @Inject constructor(private val chipClient: ChipClient) {
   // BasicCluster functions
 
   suspend fun readBasicClusterVendorIDAttribute(deviceId: Long, endpoint: Int): Int? {
+      println("eadBasicClusterVendorIDAttribute()")
     val connectedDevicePtr =
         try {
           chipClient.getConnectedDevicePointer(deviceId)
@@ -256,9 +257,11 @@ class ClustersHelper @Inject constructor(private val chipClient: ChipClient) {
               object : ChipClusters.BasicCluster.VendorIDAttributeCallback {
                 override fun onSuccess(value: Int?) {
                   continuation.resume(value)
+                    println("eadBasicClusterVendorIDAttribute: onSuccess")
                 }
                 override fun onError(ex: Exception) {
                   continuation.resumeWithException(ex)
+                    println("eadBasicClusterVendorIDAttribute: onError")
                 }
               })
     }
@@ -300,8 +303,8 @@ class ClustersHelper @Inject constructor(private val chipClient: ChipClient) {
 
       val connectedDevicePtr = 
           try {
+              //device ptr is wrong??
               chipClient.getConnectedDevicePointer(deviceId)
-
 
           } catch (e: IllegalStateException) {
               Timber.e("Can't get connectedTemperatureDevicePointer.")
@@ -314,10 +317,12 @@ class ClustersHelper @Inject constructor(private val chipClient: ChipClient) {
               .readMeasuredValueAttribute(
                   object : ChipClusters.TemperatureMeasurementCluster.MeasuredValueAttributeCallback {
                       override fun onSuccess(value: Int?) {
+                          println("on success")
                           continuation.resume(value)
                       }
 
                       override fun onError(ex: Exception) {
+                          println("on error")
                           continuation.resumeWithException(ex)
                       }
                   }
@@ -326,6 +331,7 @@ class ClustersHelper @Inject constructor(private val chipClient: ChipClient) {
   }
 
   private fun getTemperatureClusterForDevice(devicePtr: Long, endpoint: Int): ChipClusters.TemperatureMeasurementCluster {
+      //error in constructor??
       return ChipClusters.TemperatureMeasurementCluster(devicePtr, endpoint)
   }
   // -----------------------------------------------------------------------------------------------
