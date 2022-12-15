@@ -4,7 +4,7 @@ An android integration
 
 To create an android application for Matter supported devices to send data to Trackr for visualization.
 
-[Link to the demo video]()
+[Link to the demo video](https://youtu.be/8ifrk2LAsCk)
 ## Table of Contents
 
 - [Matter Trackr](#matter-trackr)
