@@ -76,7 +76,7 @@ const About = () => {
 
       <Typography variant="h5">Licenses</Typography>
       <Typography variant="h7" sx={{ color: "#707070" }}>
-        These are the licenses for the libraries we use:
+        These are the licenses for the libraries that we use:
       </Typography>
 
       <Suspense

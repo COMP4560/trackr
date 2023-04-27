@@ -3,7 +3,7 @@ package db_test
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-
+	"time"
 	"trackr/src/models"
 	"trackr/tests"
 )
@@ -35,6 +35,7 @@ func TestAddLog(t *testing.T) {
 	suite := tests.Startup()
 
 	err := suite.Service.GetLogService().AddLog("Invalid Log", models.User{}, nil)
+	time.Sleep(time.Second)
 	assert.NotNil(t, err)
 
 	logs, err := suite.Service.GetLogService().GetLogs(suite.User)
@@ -43,6 +44,7 @@ func TestAddLog(t *testing.T) {
 
 	projectId := models.Project{}.ID
 	err = suite.Service.GetLogService().AddLog("Invalid Log", suite.User, &projectId)
+	time.Sleep(time.Second)
 	assert.NotNil(t, err)
 
 	logs, err = suite.Service.GetLogService().GetLogs(suite.User)
@@ -50,6 +52,7 @@ func TestAddLog(t *testing.T) {
 	assert.Equal(t, len(suite.Logs), len(logs))
 
 	err = suite.Service.GetLogService().AddLog("Third Log", suite.User, nil)
+	time.Sleep(time.Second)
 	assert.Nil(t, err)
 
 	logs, err = suite.Service.GetLogService().GetLogs(suite.User)
@@ -59,6 +62,7 @@ func TestAddLog(t *testing.T) {
 	assert.Nil(t, logs[0].ProjectID)
 
 	err = suite.Service.GetLogService().AddLog("Fourth Log with Project", suite.User, &suite.Project.ID)
+	time.Sleep(time.Second)
 	assert.Nil(t, err)
 
 	logs, err = suite.Service.GetLogService().GetLogs(suite.User)

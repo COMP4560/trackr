@@ -1,0 +1,8 @@
+{
+	"token": "[your bot token]",
+	"clientId": "1096880366549205023",
+	"main": "index.js",
+	"API_ENDPOINT": "http://wryneck.cs.umanitoba.ca/api/values/",
+	"limit": 100,
+	"order": "asc"
+}

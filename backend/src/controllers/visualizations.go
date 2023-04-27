@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"trackr/src/forms/requests"
 	"trackr/src/forms/responses"
+	"trackr/src/forms/responses/visualizations"
 	"trackr/src/models"
 	"trackr/src/services"
 )
@@ -32,12 +32,9 @@ func addVisualizationRoute(c *gin.Context) {
 		return
 	}
 
-	createdAt := time.Now()
 	visualization := models.Visualization{
-		Metadata:  json.Metadata,
-		UpdatedAt: createdAt,
-		CreatedAt: createdAt,
-		Field:     *field,
+		Metadata: json.Metadata,
+		Field:    *field,
 	}
 
 	visualizationId, err := serviceProvider.GetVisualizationService().AddVisualization(visualization)
@@ -52,7 +49,7 @@ func addVisualizationRoute(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responses.NewVisualization{
+	c.JSON(http.StatusOK, visualizations.NewVisualization{
 		ID: visualizationId,
 	})
 }
@@ -66,21 +63,21 @@ func getVisualizationsRoute(c *gin.Context) {
 		return
 	}
 
-	project, err := serviceProvider.GetProjectService().GetProject(uint(projectId), *user)
+	userProject, err := serviceProvider.GetProjectService().GetUserProject(uint(projectId), *user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "Failed to find project."})
 		return
 	}
 
-	visualizations, err := serviceProvider.GetVisualizationService().GetVisualizations(*project, *user)
+	userVisualizations, err := serviceProvider.GetVisualizationService().GetVisualizations(userProject.Project, *user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "Failed to get visualizations."})
 		return
 	}
 
-	visualizationList := make([]responses.Visualization, len(visualizations))
-	for index, visualization := range visualizations {
-		visualizationList[index] = responses.Visualization{
+	visualizationList := make([]visualizations.Visualization, len(userVisualizations))
+	for index, visualization := range userVisualizations {
+		visualizationList[index] = visualizations.Visualization{
 			ID:      visualization.ID,
 			FieldID: visualization.Field.ID,
 
@@ -90,7 +87,7 @@ func getVisualizationsRoute(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, responses.VisualizationList{Visualizations: visualizationList})
+	c.JSON(http.StatusOK, visualizations.VisualizationList{Visualizations: visualizationList})
 }
 
 func updateVisualizationRoute(c *gin.Context) {

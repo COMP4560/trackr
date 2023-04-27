@@ -64,7 +64,8 @@ const ProjectsTable = () => {
               <TableRow>
                 <TableCell align="left">Name</TableCell>
                 <TableCell align="left">Created</TableCell>
-                <TableCell align="right"></TableCell>
+                <TableCell align="left">Organizations</TableCell>
+                {/* <TableCell align="right"></TableCell> */}
               </TableRow>
             </TableHead>
 

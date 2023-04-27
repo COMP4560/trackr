@@ -1,6 +1,8 @@
 package services
 
-import "trackr/src/models"
+import (
+	"trackr/src/models"
+)
 
 type SessionService interface {
 	GetSessionAndUser(id string) (*models.Session, *models.User, error)

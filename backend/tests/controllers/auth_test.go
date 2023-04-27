@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"trackr/src/forms/requests"
 	"trackr/src/forms/responses"
@@ -16,7 +17,7 @@ import (
 )
 
 func TestIsLoggedInRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "GET", "/api/auth/"
 
 	//
@@ -46,7 +47,7 @@ func TestIsLoggedInRoute(t *testing.T) {
 }
 
 func TestRegisterRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "POST", "/api/auth/register"
 
 	//
@@ -213,7 +214,7 @@ func TestRegisterRoute(t *testing.T) {
 }
 
 func TestLogoutRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "GET", "/api/auth/logout"
 
 	//
@@ -289,7 +290,7 @@ func TestLogoutRoute(t *testing.T) {
 }
 
 func TestLoginRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "POST", "/api/auth/login"
 
 	//
@@ -416,9 +417,10 @@ func TestLoginRoute(t *testing.T) {
 		assert.Equal(t, session.ID, sessionId)
 
 		if shouldRememberMe {
-			assert.GreaterOrEqual(t, session.ExpiresAt, session.CreatedAt.AddDate(0, 1, 0))
+			assert.GreaterOrEqual(t, session.ExpiresAt.Add(time.Millisecond*time.Duration(100)), session.CreatedAt.AddDate(0, 1, 0))
 		} else {
-			assert.True(t, session.ExpiresAt.Equal(session.CreatedAt.AddDate(0, 0, 7)))
+			assert.LessOrEqual(t, session.ExpiresAt, session.CreatedAt.AddDate(0, 0, 7))
+			assert.GreaterOrEqual(t, session.ExpiresAt.Add(time.Millisecond*time.Duration(100)), session.CreatedAt.AddDate(0, 0, 7))
 		}
 
 		assert.Nil(t, err)

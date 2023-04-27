@@ -1,11 +1,12 @@
 import { createElement } from "react";
 import Table from "./Table";
 import Graph from "./Graph";
+import PieChart from "./PieChart";
 import CenteredBox from "../CenteredBox";
 import Typography from "@mui/material/Typography";
 import ErrorIcon from "@mui/icons-material/ErrorOutline";
 
-export const VisualizationTypes = [Table, Graph];
+export const VisualizationTypes = [Table, Graph, PieChart];
 
 export const createVisualizationElement = (visualization) => {
   const metadata = JSON.parse(visualization.metadata);

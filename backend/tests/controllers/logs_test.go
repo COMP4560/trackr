@@ -13,7 +13,7 @@ import (
 )
 
 func TestGetLogsRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "GET", "/api/logs/"
 
 	//

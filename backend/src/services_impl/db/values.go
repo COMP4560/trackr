@@ -3,8 +3,9 @@ package db
 import (
 	"fmt"
 	"gorm.io/gorm"
-
+	"strings"
 	"trackr/src/models"
+	"trackr/src/services_impl/db/scopes"
 )
 
 type ValueService struct {
@@ -13,30 +14,20 @@ type ValueService struct {
 
 func (service *ValueService) GetValues(field models.Field, user models.User, order string, offset int, limit int) ([]models.Value, error) {
 	var values []models.Value
+	order = strings.ToUpper(order)
 
-	result := service.DB.Model(&models.Value{})
-	result = result.Joins("LEFT JOIN fields ON `values`.`field_id` = `fields`.`id`")
-	result = result.Joins("LEFT JOIN projects ON `fields`.`project_id` = `projects`.`id`")
-
-	if order == "asc" {
-		result = result.Order("`values`.`created_at` ASC")
-	} else if order == "desc" {
-		result = result.Order("`values`.`created_at` DESC")
-	} else {
+	if order != "ASC" && order != "DESC" {
 		return nil, fmt.Errorf("invalid order")
 	}
 
-	if offset > 0 {
-		result = result.Offset(offset)
-	}
-
-	if limit > 0 {
-		result = result.Limit(limit)
-	}
-
-	result = result.Find(&values, "`values`.`field_id` = ? AND `projects`.`user_id` = ?", field.ID, user.ID)
-
-	if result.Error != nil {
+	if result := service.DB.
+		Model(&models.Value{}).
+		Joins("INNER JOIN fields ON `values`.field_id = fields.id").
+		Joins("INNER JOIN projects ON fields.project_id = projects.id").
+		Joins("INNER JOIN user_projects ON user_projects.project_id = projects.id").
+		Order("`values`.created_at "+order).
+		Scopes(scopes.SetPagination(offset, limit)).
+		Find(&values, "`values`.field_id = ? AND user_projects.user_id = ?", field.ID, user.ID); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -46,15 +37,13 @@ func (service *ValueService) GetValues(field models.Field, user models.User, ord
 func (service *ValueService) GetNumberOfValuesByUser(user models.User) (int64, error) {
 	var count int64
 
-	result := service.DB.Model(&models.User{})
-	result = result.Model(&models.Value{})
-	result = result.Joins("LEFT JOIN fields ON `values`.`field_id` = `fields`.`id`")
-	result = result.Joins("LEFT JOIN projects ON `fields`.`project_id` = `projects`.`id`")
-	result = result.Joins("LEFT JOIN users ON `projects`.`user_id` = `users`.`id`")
-	result = result.Where("`users`.`id` = ?", user.ID)
-	result = result.Count(&count)
-
-	if result.Error != nil {
+	if result := service.DB.
+		Model(&models.Value{}).
+		Joins("INNER JOIN fields ON `values`.field_id = fields.id").
+		Joins("INNER JOIN projects ON fields.project_id = projects.id").
+		Joins("INNER JOIN user_projects ON user_projects.project_id = projects.id").
+		Where("user_projects.user_id = ?", user.ID).
+		Count(&count); result.Error != nil {
 		return 0, result.Error
 	}
 
@@ -64,13 +53,11 @@ func (service *ValueService) GetNumberOfValuesByUser(user models.User) (int64, e
 func (service *ValueService) GetNumberOfValuesByField(field models.Field) (int64, error) {
 	var count int64
 
-	result := service.DB.Model(&models.User{})
-	result = result.Model(&models.Value{})
-	result = result.Joins("LEFT JOIN fields ON `values`.`field_id` = `fields`.`id`")
-	result = result.Where("`fields`.`id` = ?", field.ID)
-	result = result.Count(&count)
-
-	if result.Error != nil {
+	if result := service.DB.
+		Model(&models.Value{}).
+		Joins("INNER JOIN fields ON `values`.field_id = fields.id").
+		Where("fields.id = ?", field.ID).
+		Count(&count); result.Error != nil {
 		return 0, result.Error
 	}
 
@@ -80,13 +67,13 @@ func (service *ValueService) GetNumberOfValuesByField(field models.Field) (int64
 func (service *ValueService) GetLastAddedValue(user models.User) (*models.Value, error) {
 	var value models.Value
 
-	result := service.DB.Model(&models.Value{})
-	result = result.Joins("LEFT JOIN fields ON `values`.`field_id` = `fields`.`id`")
-	result = result.Joins("LEFT JOIN projects ON `fields`.`project_id` = `projects`.`id`")
-	result = result.Order("`values`.`created_at` DESC")
-	result = result.First(&value, "`projects`.`user_id` = ?", user.ID)
-
-	if result.Error != nil {
+	if result := service.DB.
+		Model(&models.Value{}).
+		Joins("INNER JOIN fields ON `values`.field_id = fields.id").
+		Joins("INNER JOIN projects ON fields.project_id = projects.id").
+		Joins("INNER JOIN user_projects ON user_projects.project_id = projects.id").
+		Order("`values`.created_at DESC").
+		First(&value, "user_projects.user_id = ?", user.ID); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -96,12 +83,18 @@ func (service *ValueService) GetLastAddedValue(user models.User) (*models.Value,
 func (service *ValueService) GetValue(id uint, user models.User) (*models.Value, error) {
 	var value models.Value
 
-	result := service.DB.Model(&models.Value{})
-	result = result.Joins("LEFT JOIN fields ON `values`.`field_id` = `fields`.`id`")
-	result = result.Joins("LEFT JOIN projects ON `fields`.`project_id` = `projects`.`id`")
-	result = result.First(&value, "`values`.`id` = ? AND `projects`.`user_id` = ?", id, user.ID)
+	var values []models.Value
+	service.DB.Find(&values)
 
-	if result.Error != nil {
+	var fields []models.Field
+	service.DB.Find(&fields)
+
+	if result := service.DB.
+		Model(&models.Value{}).
+		Joins("INNER JOIN fields ON `values`.field_id = fields.id").
+		Joins("INNER JOIN projects ON fields.project_id = projects.id").
+		Joins("INNER JOIN user_projects ON user_projects.project_id = projects.id").
+		First(&value, "`values`.id = ? AND user_projects.user_id = ?", id, user.ID); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -117,8 +110,7 @@ func (service *ValueService) AddValue(value models.Value) error {
 }
 
 func (service *ValueService) DeleteValues(field models.Field) error {
-	result := service.DB.Delete(&models.Value{}, "field_id = ?", field.ID)
-	if result.Error != nil {
+	if result := service.DB.Delete(&models.Value{}, "field_id = ?", field.ID); result.Error != nil {
 		return result.Error
 	}
 

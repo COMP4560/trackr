@@ -11,7 +11,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
 	"trackr/src/forms/requests"
 	"trackr/src/forms/responses"
 	"trackr/src/models"
@@ -19,7 +18,7 @@ import (
 )
 
 func TestGetValuesRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "GET", "/api/values/"
 
 	//
@@ -105,7 +104,7 @@ func TestGetValuesRoute(t *testing.T) {
 	//
 
 	request, _ = query.Values(requests.GetValues{
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		Order:   "asc",
 		Offset:  0,
 		Limit:   0,
@@ -138,6 +137,7 @@ func TestGetValuesRoute(t *testing.T) {
 		expectedValues = append(expectedValues, newValue)
 
 		suite.Service.GetValueService().AddValue(newValue)
+		time.Sleep(time.Second)
 	}
 
 	for offset := 0; offset < numberOfExpectedValues; offset++ {
@@ -164,7 +164,7 @@ func TestGetValuesRoute(t *testing.T) {
 				}
 
 				request, _ = query.Values(requests.GetValues{
-					APIKey:  suite.Project.APIKey,
+					APIKey:  suite.UserProject.APIKey,
 					Order:   order,
 					Offset:  offset,
 					Limit:   limit,
@@ -197,7 +197,7 @@ func TestGetValuesRoute(t *testing.T) {
 }
 
 func TestDeleteValuesRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "DELETE", "/api/values/"
 
 	//
@@ -273,7 +273,7 @@ func TestDeleteValuesRoute(t *testing.T) {
 }
 
 func TestAddValueRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "POST", "/api/values/"
 
 	//
@@ -331,7 +331,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "2.00",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: models.Field{}.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -351,7 +351,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "invalid",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -371,7 +371,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "NaN",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -391,7 +391,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "-Inf",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -411,7 +411,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "Inf",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -431,7 +431,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "2.00",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Error{
@@ -458,7 +458,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "2.00",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	response, _ = json.Marshal(responses.Empty{})
@@ -485,7 +485,7 @@ func TestAddValueRoute(t *testing.T) {
 
 	request, _ = query.Values(requests.AddValue{
 		Value:   "3.00",
-		APIKey:  suite.Project.APIKey,
+		APIKey:  suite.UserProject.APIKey,
 		FieldID: suite.Field.ID,
 	})
 	httpRecorder = httptest.NewRecorder()

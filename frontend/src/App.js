@@ -11,6 +11,7 @@ import AuthorizedRoute from "./routes/AuthorizedRoute";
 import Projects from "./pages/Projects";
 import ProjectSettings from "./pages/ProjectSettings";
 import ProjectFields from "./pages/ProjectFields";
+import Organizations from "./pages/Organizations";
 import Account from "./pages/Account";
 import ChangePassword from "./pages/ChangePassword";
 import Logs from "./pages/Logs";
@@ -18,6 +19,10 @@ import About from "./pages/About";
 import SettingsRoute from "./routes/SettingsRoute";
 import Project from "./pages/Project";
 import ProjectAPI from "./pages/ProjectAPI";
+import Organization from "./pages/Organization";
+import OrganizationUsers from "./pages/OrganizationUsers";
+import OrganizationSettings from "./pages/OrganizationSettings";
+import OrganizationRoute from "./routes/OrganizationRoute";
 
 const theme = createTheme({
   palette: {
@@ -56,6 +61,10 @@ const App = () => {
             <Route
               path="/projects/"
               element={<AuthorizedRoute element={<Projects />} />}
+            />
+            <Route
+              path="/organizations/"
+              element={<AuthorizedRoute element={<Organizations />} />}
             />
             <Route
               path="/settings/"
@@ -120,6 +129,22 @@ const App = () => {
                   element={<ProjectRoute element={<ProjectFields />} />}
                 />
               }
+            />
+            <Route
+              path="/organizations/settings/:organizationId"
+              element={
+                <AuthorizedRoute
+                  element={<OrganizationRoute element={<OrganizationSettings />} />}
+                />
+              }
+            />
+            <Route
+              path="/organizations/projects/:organizationId"
+              element={<AuthorizedRoute element={<Organization />} />}
+            />
+            <Route
+              path="/organizations/users/:organizationId"
+              element={<AuthorizedRoute element={<OrganizationUsers />} />}
             />
             <Route
               path="/"

@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetUserRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "GET", "/api/users/"
 
 	//
@@ -58,7 +58,7 @@ func TestGetUserRoute(t *testing.T) {
 }
 
 func TestUpdateUserRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "PUT", "/api/users/"
 
 	//
@@ -304,7 +304,7 @@ func TestUpdateUserRoute(t *testing.T) {
 }
 
 func TestDeleteUserRoute(t *testing.T) {
-	suite := tests.StartupWithRouter()
+	suite := tests.StartupWithRouter(t)
 	method, path := "DELETE", "/api/users/"
 
 	//
@@ -330,7 +330,7 @@ func TestDeleteUserRoute(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Equal(t, suite.User.ID, user.ID)
 
-	projects, err := suite.Service.GetProjectService().GetProjects(suite.User)
+	projects, err := suite.Service.GetProjectService().GetUserProjects(suite.User)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(projects))
 
@@ -347,7 +347,7 @@ func TestDeleteUserRoute(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, user)
 
-	projects, err = suite.Service.GetProjectService().GetProjects(suite.User)
+	projects, err = suite.Service.GetProjectService().GetUserProjects(suite.User)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(projects))
 }

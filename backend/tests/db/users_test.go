@@ -3,7 +3,6 @@ package db_test
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-
 	"trackr/src/models"
 	"trackr/tests"
 )
@@ -74,9 +73,11 @@ func TestDeleteUser(t *testing.T) {
 	// Check before we delete if our relationships are correct.
 	//
 
-	project, err := suite.Service.GetProjectService().GetProject(suite.Project.ID, suite.User)
+	userProject, err := suite.Service.GetProjectService().GetUserProject(suite.Project.ID, suite.User)
 	assert.Nil(t, err)
-	assert.NotNil(t, project)
+	assert.NotNil(t, userProject)
+	assert.NotNil(t, userProject.Project)
+	assert.NotNil(t, userProject.User)
 
 	session, _, err := suite.Service.GetSessionService().GetSessionAndUser(suite.Session.ID)
 	assert.Nil(t, err)
@@ -127,9 +128,9 @@ func TestDeleteUser(t *testing.T) {
 	// Check if cascade delete works.
 	//
 
-	project, err = suite.Service.GetProjectService().GetProject(suite.Project.ID, suite.User)
+	userProject, err = suite.Service.GetProjectService().GetUserProject(suite.Project.ID, suite.User)
 	assert.NotNil(t, err)
-	assert.Nil(t, project)
+	assert.Nil(t, userProject)
 
 	session, _, err = suite.Service.GetSessionService().GetSessionAndUser(suite.Session.ID)
 	assert.NotNil(t, err)
@@ -146,10 +147,6 @@ func TestDeleteUser(t *testing.T) {
 	visualization, err = suite.Service.GetVisualizationService().GetVisualization(suite.Visualization.ID, suite.User)
 	assert.NotNil(t, err)
 	assert.Nil(t, visualization)
-
-	logs, err = suite.Service.GetLogService().GetLogs(suite.User)
-	assert.Nil(t, err)
-	assert.Equal(t, 0, len(logs))
 }
 
 func TestUpdateUser(t *testing.T) {

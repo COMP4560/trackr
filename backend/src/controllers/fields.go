@@ -2,15 +2,14 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/gin-gonic/gin"
+	"trackr/src/models"
 
 	"trackr/src/forms/requests"
 	"trackr/src/forms/responses"
-	"trackr/src/models"
 	"trackr/src/services"
 )
 
@@ -23,7 +22,7 @@ func addFieldRoute(c *gin.Context) {
 		return
 	}
 
-	project, err := serviceProvider.GetProjectService().GetProject(json.ProjectID, *user)
+	userProject, err := serviceProvider.GetProjectService().GetUserProject(json.ProjectID, *user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "Cannot find project."})
 		return
@@ -34,14 +33,10 @@ func addFieldRoute(c *gin.Context) {
 		return
 	}
 
-	createdAt := time.Now()
-
 	field := models.Field{
 		Name:      json.Name,
-		UpdatedAt: createdAt,
-		CreatedAt: createdAt,
-
-		Project: *project,
+		Project:   userProject.Project,
+		CreatedAt: time.Now(),
 	}
 
 	field.ID, err = serviceProvider.GetFieldService().AddField(field)
@@ -50,7 +45,7 @@ func addFieldRoute(c *gin.Context) {
 		return
 	}
 
-	err = serviceProvider.GetLogService().AddLog(fmt.Sprintf("Added the field %s.", field.Name), *user, &project.ID)
+	err = serviceProvider.GetLogService().AddLog(fmt.Sprintf("Added the field %s.", field.Name), *user, &userProject.ProjectID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.Error{Error: "Failed to create a log entry."})
 		return
@@ -70,13 +65,13 @@ func getFieldsRoute(c *gin.Context) {
 		return
 	}
 
-	project, err := serviceProvider.GetProjectService().GetProject(uint(projectId), *user)
+	userProject, err := serviceProvider.GetProjectService().GetUserProject(uint(projectId), *user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "Failed to find project."})
 		return
 	}
 
-	fields, err := serviceProvider.GetFieldService().GetFields(*project, *user)
+	fields, err := serviceProvider.GetFieldService().GetFields(userProject.Project, *user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, responses.Error{Error: "Failed to get fields."})
 		return

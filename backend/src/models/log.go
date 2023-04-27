@@ -1,14 +1,15 @@
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Log struct {
-	ID        uint `gorm:"primarykey"`
-	Message   string
-	CreatedAt time.Time
+	gorm.Model
+	Message string
 
 	UserID uint
-	User   User `gorm:"constraint:OnDelete:CASCADE;"`
+	User   User
 
 	ProjectID *uint
 	Project   Project `gorm:"constraint:OnDelete:SET NULL;"`

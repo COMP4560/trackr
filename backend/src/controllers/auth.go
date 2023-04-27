@@ -1,20 +1,19 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"math"
 	"net/http"
 	"net/mail"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
+	"trackr/src/models"
 
 	"trackr/src/common"
 	"trackr/src/forms/requests"
 	"trackr/src/forms/responses"
-	"trackr/src/models"
 	"trackr/src/services"
 )
 
@@ -68,8 +67,7 @@ func loginRoute(c *gin.Context) {
 		return
 	}
 
-	createdAt := time.Now()
-	expiresAt := createdAt
+	expiresAt := time.Now()
 
 	if json.RememberMe {
 		expiresAt = expiresAt.AddDate(0, 1, 0)
@@ -81,7 +79,6 @@ func loginRoute(c *gin.Context) {
 		ID:        sessionId,
 		UserAgent: c.Request.UserAgent(),
 		ExpiresAt: expiresAt,
-		CreatedAt: createdAt,
 		User:      *user,
 	}
 
@@ -97,7 +94,7 @@ func loginRoute(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(sessionCookie, sessionId, math.MaxInt32, "/", "*", true, true)
+	c.SetCookie(sessionCookie, sessionId, math.MaxInt32, "/", "*", false, true)
 	c.JSON(http.StatusOK, responses.Empty{})
 }
 
@@ -203,8 +200,6 @@ func registerRoute(c *gin.Context) {
 		FirstName:  json.FirstName,
 		LastName:   json.LastName,
 		IsVerified: false,
-		UpdatedAt:  time.Now(),
-		CreatedAt:  time.Now(),
 
 		MaxValues:        maxValues,
 		MaxValueInterval: maxValueInterval,

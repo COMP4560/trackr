@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gin-contrib/gzip"
@@ -36,10 +37,18 @@ func InitRouter(serviceProviderInput services.ServiceProvider) *gin.Engine {
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(corsMiddleware())
 
+	router.ForwardedByClientIP = false
+	err := router.SetTrustedProxies([]string{os.Getenv("DOCKER_ADDRESS"), os.Getenv("LOCAL_ADDRESS")})
+	if err != nil {
+		fmt.Println("Error setting trusted proxies:", err)
+		return nil
+	}
+
 	routerGroup := router.Group("/api")
 	sessionMiddleware := initAuthMiddleware(serviceProvider)
 
 	initAuthController(routerGroup, serviceProvider)
+	initOrganizationsController(routerGroup, serviceProvider, sessionMiddleware)
 	initProjectsController(routerGroup, serviceProvider, sessionMiddleware)
 	initUsersController(routerGroup, serviceProvider, sessionMiddleware)
 	initFieldsController(routerGroup, serviceProvider, sessionMiddleware)

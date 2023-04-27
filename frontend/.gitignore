@@ -22,4 +22,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-.env.production
+
+# VSCode local history ignore
+.history/
+.history

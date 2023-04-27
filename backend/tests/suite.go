@@ -1,11 +1,12 @@
 package tests
 
 import (
-	"time"
-
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
-
+	"gorm.io/gorm"
+	"testing"
+	"time"
 	"trackr/src/controllers"
 	"trackr/src/models"
 	"trackr/src/services"
@@ -18,6 +19,7 @@ type Suite struct {
 
 	User           models.User
 	Project        models.Project
+	UserProject    models.UserProject
 	Session        models.Session
 	ExpiredSession models.Session
 	Time           time.Time
@@ -33,35 +35,46 @@ func Startup() *Suite {
 	suite.Service = services_impl.InitServiceProvider(sqlite.Open(":memory:?_foreign_keys=on"))
 	suite.Time = time.Now()
 	suite.User = models.User{
-		ID:               1,
+		Model: gorm.Model{
+			ID: 1,
+		},
 		Email:            "Email@email",
 		Password:         "$2a$12$Z4Ko/2d/EfenK9nBtpBRVO8I/3yOPnpcT/D/sbueRmhVDujVjHT4S",
 		FirstName:        "FirstName",
 		LastName:         "LastName",
-		UpdatedAt:        suite.Time,
-		CreatedAt:        suite.Time,
 		IsVerified:       true,
 		MaxValues:        1,
 		MaxValueInterval: 5,
 	}
 	suite.Service.GetUserService().AddUser(suite.User)
+	savedUser, _ := suite.Service.GetUserService().GetUser(suite.User.Email)
+	suite.User = *savedUser
 
 	suite.Project = models.Project{
-		ID:          1,
+		Model: gorm.Model{
+			ID: 1,
+		},
 		Name:        "Name",
 		Description: "Description",
-		APIKey:      "APIKey",
-		CreatedAt:   suite.Time,
-		UpdatedAt:   suite.Time,
-
-		UserID: suite.User.ID,
-		User:   suite.User,
 	}
-	suite.Service.GetProjectService().AddProject(suite.Project)
+
+	suite.UserProject = models.UserProject{
+		ProjectID: 1,
+		UserID:    suite.User.ID,
+		Project:   suite.Project,
+		User:      suite.User,
+		Role:      "project_owner",
+		DeletedAt: sql.NullTime{},
+		APIKey:    "APIKey",
+	}
+
+	id, _ := suite.Service.GetProjectService().AddProject(suite.Project, suite.UserProject)
+	userProject, _ := suite.Service.GetProjectService().GetUserProject(id, suite.User)
+	suite.UserProject = *userProject
+	suite.Project = userProject.Project
 
 	suite.Session = models.Session{
 		ID:        "SessionID",
-		CreatedAt: suite.Time,
 		ExpiresAt: suite.Time.AddDate(1, 0, 0),
 
 		UserID: suite.User.ID,
@@ -71,7 +84,6 @@ func Startup() *Suite {
 
 	suite.ExpiredSession = models.Session{
 		ID:        "ExpiredSessionID",
-		CreatedAt: suite.Time,
 		ExpiresAt: suite.Time,
 
 		UserID: suite.User.ID,
@@ -82,22 +94,20 @@ func Startup() *Suite {
 	suite.Field = models.Field{
 		ID:        1,
 		Name:      "Field1",
-		UpdatedAt: suite.Time,
-		CreatedAt: suite.Time,
-
 		ProjectID: suite.Project.ID,
 		Project:   suite.Project,
+		CreatedAt: time.Now(),
 	}
 	suite.Service.GetFieldService().AddField(suite.Field)
 
 	suite.Visualization = models.Visualization{
-		ID:        1,
-		Metadata:  "Metadata",
-		UpdatedAt: suite.Time,
-		CreatedAt: suite.Time,
+		ID:       1,
+		Metadata: "Metadata",
 
-		FieldID: suite.Field.ID,
-		Field:   suite.Field,
+		FieldID:   suite.Field.ID,
+		Field:     suite.Field,
+		UpdatedAt: time.Now(),
+		CreatedAt: time.Now(),
 	}
 	suite.Service.GetVisualizationService().AddVisualization(suite.Visualization)
 
@@ -112,10 +122,13 @@ func Startup() *Suite {
 	suite.Service.GetValueService().AddValue(suite.Value)
 
 	suite.Service.GetLogService().AddLog("First Log", suite.User, nil)
+	time.Sleep(time.Second)
 	suite.Service.GetLogService().AddLog("Second Log", suite.User, &suite.Project.ID)
 	suite.Logs = []models.Log{
 		{
-			ID:      2,
+			Model: gorm.Model{
+				ID: 2,
+			},
 			Message: "Second Log",
 
 			ProjectID: &suite.Project.ID,
@@ -125,7 +138,9 @@ func Startup() *Suite {
 			User:   suite.User,
 		},
 		{
-			ID:      1,
+			Model: gorm.Model{
+				ID: 1,
+			},
 			Message: "First Log",
 
 			ProjectID: nil,
@@ -139,7 +154,10 @@ func Startup() *Suite {
 	return &suite
 }
 
-func StartupWithRouter() *Suite {
+func StartupWithRouter(t *testing.T) *Suite {
+	t.Setenv("DOCKER_ADDRESS", "172.18.0.2")
+	t.Setenv("LOCAL_ADDRESS", "127.0.0.1")
+
 	gin.SetMode(gin.ReleaseMode)
 
 	suite := Startup()
